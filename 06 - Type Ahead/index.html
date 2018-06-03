@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Type Ahead 👀</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <form class="search-form">
+    <input type="text" class="search" placeholder="City or State">
+    <ul class="suggestions">
+      <li>Filter for a city</li>
+      <li>or a state</li>
+    </ul>
+  </form>
+<script>
+const request = new Request('https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json')
+const $suggestions = document.querySelector('.suggestions')
+const $searchInput = document.querySelector('.search')
+const removeAllSuggestions = () => $suggestions.innerHTML = ''
+const get$Highlight = str => `<i class='hl'>${str}</i>`
+const get$Population = int => `<span class='population'>${int.toLocaleString()}</span>`
+const findAll = (arr, searchValue) => arr.filter(str => str.toLowerCase().includes(searchValue.toLowerCase()))
+
+const addSuggestion = (city, population, searchString) => {
+  const $node = document.createElement('li')
+  $node.innerHTML = city.replace(new RegExp(searchString, 'gi'), get$Highlight)
+  $node.innerHTML += get$Population(population)
+  $suggestions.appendChild($node)
+}
+
+function processInput (cities) {
+  removeAllSuggestions()
+  if (!this.value) return
+  const matches = findAll([...cities.keys()], this.value)
+  matches.forEach(city => addSuggestion(city, cities.get(city), this.value))
+}
+
+fetch(request)
+  .then(response => response.json())
+  .then(arr => arr.reduce((cities, cityData) =>
+    cities.set(
+      `${cityData.city}, ${cityData.state}`,
+      +cityData.population
+      )
+  , new Map))
+  .then(cities => $searchInput.addEventListener('input', processInput.bind($searchInput, cities)))
+
+
+</script>
+  </body>
+</html>
