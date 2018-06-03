@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HTML5 Canvas</title>
+</head>
+<body>
+<canvas id="draw" width="800" height="800"></canvas>
+<script>
+  const canvas = document.querySelector('#draw')
+  const ctx = canvas.getContext('2d')
+  const last = arr => arr[arr.length - 1]
+  const zip = (a,b) => a.map((x, i) => [x, b[i]])
+  const repeatFn = (n, fn) => [...Array(n)].forEach(fn)
+  const getHue = hue => `hsl(${hue}, 100%, 50%)`
+  const X = 0
+  const Y = 1
+  const FORWARDS = 1
+  const BACKWARDS = -1
+
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+  ctx.strokeStyle = '#333333'
+  ctx.lineJoin = 'round'
+  ctx.lineCap = 'round'
+  ctx.lineWidth = 100
+
+  const MAX = [canvas.width, canvas.height]
+
+  let isDrawing = false
+  let lastX = []
+  let lastY = []
+  let hue = 0
+
+  const draw = (x, y, x2, y2, strokeStyle) => {
+    ctx.strokeStyle = strokeStyle
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    ctx.lineTo(x2, y2)
+    ctx.stroke()
+  }
+
+  const handleMouse = e => {
+    if (!isDrawing) return
+    hue = Math.random() * 360
+    draw(
+      last(lastX),
+      last(lastY),
+      e.offsetX,
+      e.offsetY,
+      getHue(hue)
+    )
+    lastX.push(e.offsetX)
+    lastY.push(e.offsetY)
+  }
+
+  const delayDraw = (x, y, x2, y2, strokeStyle, timeout) =>
+    setTimeout(_ =>
+      draw(x, y, x2, y2, strokeStyle)
+    , timeout)
+
+  const getDirection = (point, max, direction) =>
+    point > max ? BACKWARDS
+      : point <= 0 ? FORWARDS
+        : Math.random() * 100 < 2 ? -direction
+          : direction
+
+  const drawStrokeAndGetNext = props => {
+    props.next = [X, Y].map(axis => props.previous[axis] + Math.random() * 5 * props.directions[axis])
+    props.directions = [X, Y].map(axis => getDirection(props.previous[axis], MAX[axis], props.directions[axis]))
+    props.hue += ~~(Math.random() * 10)
+    props.timeout += 5
+    delayDraw(
+      ...props.previous,
+      ...props.next,
+      getHue(props.hue),
+      props.timeout
+    )
+    props.previous = props.next
+  }
+
+  const randomlyDraw = _ => {
+    const numberOfStrokes = ~~(Math.random() * 5000)
+    const props = {
+      previous: [X, Y].map(axis => Math.random() * MAX[axis]),
+      next: null,
+      directions: [FORWARDS, FORWARDS],
+      hue: 0,
+      timeout: 0
+    }
+    repeatFn(numberOfStrokes, _ => drawStrokeAndGetNext(props))
+  }
+
+  const randomlyRemove = () => {
+    const toRemove = zip(lastX, lastY)
+    let previous = toRemove[0]
+    let timeout = 0
+    toRemove.slice(1).forEach((coordinates) => {
+      timeout += 20
+      delayDraw(...previous, ...coordinates, '#ffffff', timeout)
+      previous = coordinates
+    })
+  }
+
+  canvas.addEventListener('mousemove', handleMouse)
+  canvas.addEventListener('mousedown', e => (isDrawing = true, lastX = [e.offsetX - 1], lastY = [e.offsetY - 1], handleMouse(e)))
+  canvas.addEventListener('mouseup', _ => isDrawing = false,)
+  canvas.addEventListener('mouseout', _ => isDrawing = false)
+  document.addEventListener('keydown', e => (e.key === 'z') && randomlyRemove())
+  document.addEventListener('keydown', e => (e.key === 'a') && repeatFn(~~(1 + Math.random() * 10), _ => randomlyDraw()))
+
+</script>
+
+<style>
+  html, body {
+    margin:0;
+  }
+</style>
+
+</body>
+</html>
