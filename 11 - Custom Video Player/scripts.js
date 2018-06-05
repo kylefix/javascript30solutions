@@ -66,7 +66,6 @@ $video.addEventListener('click', togglePlay)
 $playButtons.forEach($playButton => $playButton.addEventListener('click', handlePlay))
 
 $volume.addEventListener('input', setVolume)
-
 $playbackRate.addEventListener('input', setPlaybackRate)
 
 $progressBar.addEventListener('click', setTime)

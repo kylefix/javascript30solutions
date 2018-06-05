@@ -65,7 +65,7 @@
         : Math.random() * 100 < 2 ? -direction
           : direction
 
-  const drawStrokeAndGetNext = props => {
+  const drawStrokeAndSetNext = props => {
     props.next = [X, Y].map(axis => props.previous[axis] + Math.random() * 5 * props.directions[axis])
     props.directions = [X, Y].map(axis => getDirection(props.previous[axis], MAX[axis], props.directions[axis]))
     props.hue += ~~(Math.random() * 10)
@@ -88,7 +88,7 @@
       hue: 0,
       timeout: 0
     }
-    repeatFn(numberOfStrokes, _ => drawStrokeAndGetNext(props))
+    repeatFn(numberOfStrokes, _ => drawStrokeAndSetNext(props))
   }
 
   const randomlyRemove = () => {
