@@ -182,20 +182,24 @@
     </li>
   </ul>
 <script>
+
   const toSeconds = time =>
     time
       .split(':')
-      .reduce((total, value, index, {length}) =>
-        total + value * (60 ** (length - index - 1))
+      .reverse()
+      .reduce((total, value, index) =>
+          total + value * 60 ** index
         , 0)
 
   const secsToHrsMinsSecs = total =>
-    [...Array(3)].map((_, index) => {
-      const base = 60 ** (2 - index)
-      const answer = ~~(total / base)
-      total %= base
-      return answer
-    }).join(':')
+    [...Array(3)]
+      .map((_, index) => {
+          const base = 60 ** (2 - index)
+          const answer = ~~(total / base)
+          total %= base
+          return answer
+        })
+      .join(':')
 
   const addHrsMinsSecs = (a, b) =>
     secsToHrsMinsSecs(toSeconds(a) + toSeconds(b))
