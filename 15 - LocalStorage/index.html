@@ -30,6 +30,7 @@
   const $itemName = $addItemsForm.querySelector('[name="item"]')
   const $itemsList = document.querySelector('.plates')
   const items = JSON.parse(localStorage.getItem('items')) || []
+
   const clearChilds = node => node.innerHTML = ''
   const storeArray = (key, arr) => localStorage.setItem(key, JSON.stringify(arr))
   const appendChilds = (node, xs) => xs.forEach(x => node.appendChild(x))
@@ -61,7 +62,7 @@
   const addItem = function(e) {
     e.preventDefault()
     items.push({
-      name: $addItemsForm.querySelector('[name=item]').value,
+      name: $itemName.value,
       checked: false
     })
     this.reset()
